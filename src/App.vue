@@ -2,55 +2,128 @@
   <v-app>
     <v-app-bar app>
       <div class="app-bar-heading">
-        <span class="font-weight-medium">Livestream </span>
+        <span class="font-weight-medium">Livestream</span>
         <span class="blue--text">Radio</span>
       </div>
     </v-app-bar>
 
     <v-content>
-      
+      <v-container fluid>
+        <v-layout>
+          <v-flex xs6>
+            <v-responsive :aspect-ratio="16/9">
+              <youtube video-id="hHW1oY26kxQ" ref="youtube" width="100%" height="100%"></youtube>
+            </v-responsive>
+          </v-flex>
+          <v-flex>hello</v-flex>
+        </v-layout>
+      </v-container>
     </v-content>
 
-    <v-footer app elevation="8" color="white" height="90">
-      <div class="footer-image">
-        <v-img
-          src="https://img.youtube.com/vi/hHW1oY26kxQ/sddefault.jpg"
-          aspect-ratio=".8"
-        ></v-img>
-      </div>
-      <div class="footer-text">
-        Station Name
-      </div>
-      <v-layout align-center justify-center>
-        <v-btn class="mx-2" tile large icon color="black">
-          <v-icon dark>more_vert</v-icon>
-        </v-btn>
-        <v-btn class="mx-2" tile large icon color="black">
-          <v-icon dark>skip_previous</v-icon>
-        </v-btn>
-        <v-btn class="mx-2" fab dark color="blue">
-          <v-icon dark large>play_arrow</v-icon>
-        </v-btn>
-        <v-btn class="mx-2" tile large icon color="black">
-          <v-icon dark>skip_next</v-icon>
-        </v-btn>
-        <v-icon class="mx-8" color="black">volume_up</v-icon>
-      </v-layout>
-    </v-footer>
+    <Footer 
+      @footerClick="handleFooterClick"
+      @volumeChange="handleVolumeChange"
+      :playing="playing"
+      :volume.sync="volume"></Footer>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
+import vueHeadful from "vue-headful";
+import Footer from "./components/Footer";
+import HelloWorld from "./components/HelloWorld";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld,
+    Footer,
+    HelloWorld
   },
   data: () => ({
-    //
+    //app data
+    playing: false,
+    volume: 100,
+    //user data
+    userData: {
+      firstVisit: false,
+      stations: null,
+      sets: null,
+      prevVolume: null
+    }
   }),
+  methods: {
+    //footer methods
+    handleFooterClick(buttonName, event) {
+      console.log(event);
+      let player = this.$refs.youtube.player;
+      switch (buttonName) {
+        case "play_arrow":
+          //prevents function from being double triggered 
+          //if the play button has focus and user presses spacebar
+          if(event.detail == 1) {
+            this.toggleVideo();
+          }
+          break;
+
+        default:
+          break;
+      }
+    },
+    handleVolumeChange() {
+      
+    },
+    //video methods
+    toggleVideo() {
+      let player = this.$refs.youtube.player;
+      this.playing ? player.pauseVideo() : player.playVideo();
+
+      this.playing = !this.playing;
+    },
+    //storage methods
+    updateLocalStorage() {
+      localStorage.setItem("userData", JSON.stringify(this.userData));
+    },
+    loadLocalStorage() {
+      let storedData = JSON.parse(localStorage.getItem("userData"));
+
+      if (storedData) {
+        for (let key in storedData) {
+          let value = storedData[key];
+          this.userData[key] = value;
+        }
+      } else {
+        console.log("looks like this is your first visit!");
+        this.userData.firstVisit = true;
+      }
+    },
+    //listener functions
+    addListeners() {
+      document.addEventListener("keypress", e => {
+        switch (e.code) {
+          case "Space":
+            this.toggleVideo();
+            break;
+        }
+      });
+    }
+  },
+  watch: {    
+    volume(newValue, oldValue) {
+      let player = this.$refs.youtube.player;
+      player.setVolume(newValue);    
+    }
+  },
+  mounted() {
+    //debug seed data
+    this.userData.stations = "here are some stations";
+    this.userData.sets = "here are some sets";
+    this.userData.prevVolume = 50;
+    this.updateLocalStorage();
+    // debug ends here
+
+    this.addListeners();
+    this.loadLocalStorage();
+  }
 };
 </script>
 
@@ -59,26 +132,5 @@ export default {
   width: 100%;
   text-align: center;
   font-size: 1.3rem;
-}
-
-.footer-image {
-  position: absolute;
-  height: 100%;
-  width: 6.5rem;
-  margin-left: -1rem;
-  background-color: red;
-}
-
-.footer-text {
-  position: absolute;
-  left: 7.5rem;
-}
-</style>
-
-<style lang="scss">
-.footer-image {
-  .v-image__image--cover {
-    margin-top: -18px;
-  }
 }
 </style>
