@@ -14,8 +14,8 @@
               height="80"
               @click="$emit('changeStation', station)"
             ></v-img>
-            <div class="thumbnail__more" v-if="hover">
-              <v-icon color="white">more_vertical</v-icon>
+            <div class="thumbnail__more">
+              <ContextMenu color="white" type="station"></ContextMenu>
             </div>
             <div class="thumbnail__play" v-if="hover" @click="$emit('changeStation', station)">
               <v-icon color="white">play_circle_filled</v-icon>
@@ -31,8 +31,13 @@
 </template>
 
 <script>
+import ContextMenu from "../components/ContextMenu";
+
 export default {
   name: "RecentStations",
+  components: {
+    ContextMenu
+  },
   props: {
     stations: Array
   },
