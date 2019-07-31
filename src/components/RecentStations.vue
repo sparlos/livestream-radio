@@ -1,11 +1,14 @@
 <template>
   <v-container fluid mb-4>
-    <v-layout wrap justify-start px-5
-    >
-      <v-flex xs12 offset-xs1 my-4 font-weight-medium class="text--underline">
-        Your Stations
-      </v-flex>
-      <v-flex v-for="(station, i) in stations" :key="i" shrink mr-4 :offset-xs1="i===0 ? true : false">
+    <v-layout wrap justify-start px-5>
+      <v-flex xs12 offset-xs1 my-4 font-weight-medium class="text--underline">Your Stations</v-flex>
+      <v-flex
+        v-for="(station, i) in stations"
+        :key="i"
+        shrink
+        mr-4
+        :offset-xs1="i===0 ? true : false"
+      >
         <v-hover v-slot:default="{ hover }">
           <div class="thumbnail" :title="station.name">
             <v-img
@@ -15,14 +18,17 @@
               @click="$emit('changeStation', station)"
             ></v-img>
             <div class="thumbnail__more">
-              <ContextMenu color="white" type="station"></ContextMenu>
+              <ContextMenu 
+                color="white" 
+                type="station"
+                @deleteStation="handleDeleteStation" 
+                :station="station" 
+                :stationIndex="i"></ContextMenu>
             </div>
             <div class="thumbnail__play" v-if="hover" @click="$emit('changeStation', station)">
               <v-icon color="white">play_circle_filled</v-icon>
             </div>
-            <div class="thumbnail__text subtitle-2" v-if="hover">
-              {{station.name}}
-            </div>
+            <div class="thumbnail__text subtitle-2" v-if="hover">{{station.name}}</div>
           </div>
         </v-hover>
       </v-flex>
@@ -42,7 +48,9 @@ export default {
     stations: Array
   },
   methods: {
-
+    handleDeleteStation(stationIndex, snackbarText) {
+      this.$emit('deleteStation', stationIndex, snackbarText);
+    }
   }
 };
 </script>

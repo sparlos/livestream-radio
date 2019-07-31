@@ -46,10 +46,8 @@
           </v-btn>
         </div>
       </template>
-      
-      <AddStationModal
-        @addStation="addStation"
-        @closeDialog="dialog = false"></AddStationModal>
+
+      <AddStationModal @addStation="addStation" @closeDialog="dialog = false"></AddStationModal>
     </v-dialog>
 
     <v-content>
@@ -57,7 +55,15 @@
         v-show="view === 'home'"
         :userData="userData"
         @setPlayer="handleSetPlayer"
-        @changeStation="changeStation"></Home>
+        @changeStation="changeStation"
+        @deleteStation="deleteStation"
+      ></Home>
+
+      <!-- snackbar -->
+      <v-snackbar v-model="snackbar" :timeout="4000" bottom right>
+        {{snackbarText}}
+        <v-btn color="pink" text @click="undoDeleteStation">Undo</v-btn>
+      </v-snackbar>
     </v-content>
 
     <Footer
@@ -107,21 +113,33 @@ export default {
     currentStation: null,
     dialog: false,
     player: null,
-    view: 'home',
+    view: "home",
+    //snackbar data
+    snackbar: false,
+    snackbarText: "",
+    //undo data
+    deletedStation: null,
     //user data
     userData: {
       firstVisit: false,
       stations: null,
       sets: null,
-      prevVolume: null
+      prevVolume: 10
     }
   }),
   computed: {
     siteTitle() {
-      return this.playing ? this.currentStation.name +' - Livestream Radio' : "Livestream Radio";
+      return this.playing
+        ? this.currentStation.name + " - Livestream Radio"
+        : "Livestream Radio";
     }
   },
   methods: {
+    //snackbar methods
+    triggerSnackbar(text) {
+      this.snackbar = true;
+      this.snackbarText = text;
+    },
     //footer methods
     handleFooterClick(buttonName, event) {
       switch (buttonName) {
@@ -158,6 +176,24 @@ export default {
       this.userData.stations.push(new Station(name, url));
       this.updateLocalStorage();
     },
+    deleteStation(stationIndex, snackbarText) {
+      this.deletedStation = {
+        station: this.userData.stations[stationIndex],
+        index: stationIndex
+      };
+      this.triggerSnackbar(snackbarText);
+      this.userData.stations.splice(stationIndex, 1);
+      this.updateLocalStorage();
+    },
+    undoDeleteStation() {
+      this.userData.stations.splice(
+        this.deletedStation.index,
+        0,
+        this.deletedStation.station
+      );
+      this.snackbar = false;
+      this.updateLocalStorage();
+    },
     //storage methods
     updateLocalStorage() {
       localStorage.setItem("userData", JSON.stringify(this.userData));
@@ -172,12 +208,13 @@ export default {
         this.userData.firstVisit = true;
       }
     },
-    //listener functions
+    //listener methods
     addListeners() {
       document.addEventListener("keypress", e => {
         switch (e.code) {
           case "Space":
-            if(!this.dialog) {
+            if (!this.dialog) {
+              e.preventDefault();
               this.toggleVideo();
             }
             break;
@@ -188,6 +225,8 @@ export default {
   watch: {
     volume(newValue, oldValue) {
       this.player.setVolume(newValue);
+      this.userData.prevVolume = newValue;
+      this.updateLocalStorage();
     }
   },
   beforeMount() {
@@ -212,6 +251,11 @@ export default {
     this.currentStation = this.userData.stations[0];
   },
   mounted() {
+    this.player.loadVideoById(this.userData.stations[0].id).then(()=>{
+      this.player.stopVideo();
+      this.volume = this.userData.prevVolume;
+
+    });
     this.addListeners();
   }
 };
