@@ -53,17 +53,11 @@
     </v-dialog>
 
     <v-content>
-      <RecentStations @changeStation="changeStation" :stations="userData.stations"></RecentStations>
-      <v-container fluid>
-        <v-layout>
-          <v-flex offset-xs1 xs5>
-            <v-responsive :aspect-ratio="16/9">
-              <youtube ref="youtube" width="100%" height="100%"></youtube>
-            </v-responsive>
-          </v-flex>
-          <v-flex>this is where stations in a set go</v-flex>
-        </v-layout>
-      </v-container>
+      <Home
+        v-show="view === 'home'"
+        :userData="userData"
+        @setPlayer="handleSetPlayer"
+        @changeStation="changeStation"></Home>
     </v-content>
 
     <Footer
@@ -92,8 +86,8 @@ import vueHeadful from "vue-headful";
 
 import Station from "./classes/Station";
 
-import RecentStations from "./components/RecentStations";
 import AddStationModal from "./components/AddStationModal";
+import Home from "./views/Home";
 import Footer from "./components/Footer";
 import HelloWorld from "./components/HelloWorld";
 
@@ -101,8 +95,8 @@ export default {
   name: "App",
   components: {
     vueHeadful,
-    RecentStations,
     AddStationModal,
+    Home,
     Footer,
     HelloWorld
   },
@@ -112,6 +106,8 @@ export default {
     volume: 100,
     currentStation: null,
     dialog: false,
+    player: null,
+    view: 'home',
     //user data
     userData: {
       firstVisit: false,
@@ -122,14 +118,12 @@ export default {
   }),
   computed: {
     siteTitle() {
-      return this.playing ? this.currentStation.name : "Livestream Radio";
+      return this.playing ? this.currentStation.name +' - Livestream Radio' : "Livestream Radio";
     }
   },
   methods: {
     //footer methods
     handleFooterClick(buttonName, event) {
-      console.log(event);
-      let player = this.$refs.youtube.player;
       switch (buttonName) {
         case "play_arrow":
           //prevents function from being double triggered
@@ -145,19 +139,20 @@ export default {
     },
     handleVolumeChange() {},
     //video methods
+    handleSetPlayer(player) {
+      this.player = player;
+    },
     toggleVideo() {
-      let player = this.$refs.youtube.player;
-      this.playing ? player.pauseVideo() : player.playVideo();
+      this.playing ? this.player.pauseVideo() : this.player.playVideo();
 
       this.playing = !this.playing;
     },
     //station methods
     changeStation(station) {
-      let player = this.$refs.youtube.player;
       this.currentStation = station;
       this.playing = true;
 
-      player.loadVideoById(station.id);
+      this.player.loadVideoById(station.id);
     },
     addStation(name, url) {
       this.userData.stations.push(new Station(name, url));
@@ -192,8 +187,7 @@ export default {
   },
   watch: {
     volume(newValue, oldValue) {
-      let player = this.$refs.youtube.player;
-      player.setVolume(newValue);
+      this.player.setVolume(newValue);
     }
   },
   beforeMount() {

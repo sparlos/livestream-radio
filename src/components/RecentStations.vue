@@ -1,6 +1,7 @@
 <template>
   <v-container fluid mb-4>
-    <v-layout wrap justify-start>
+    <v-layout wrap justify-start px-5
+    >
       <v-flex xs12 offset-xs1 my-4 font-weight-medium class="text--underline">
         Your Stations
       </v-flex>
