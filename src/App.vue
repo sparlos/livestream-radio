@@ -22,18 +22,15 @@
       height="200"
       width="100"
     >
-      <div class="navbar-left black--text">
-        <div class="navbar-left__item">
+      <div class="navbar-left">
+        <div class="navbar-left__item" v-for="(item, i) in views" :key="i" @click="view = item.name">
           <div class="navbar-left__icon">
-            <v-icon color="blue">home</v-icon>
+            <v-icon :color="item.name === view ? 'blue' : 'black'">{{item.icon}}</v-icon>
           </div>
-          <div class="navbar-left__text blue--text">home</div>
-        </div>
-        <div class="navbar-left__item">
-          <div class="navbar-left__icon">
-            <v-icon color="black">library_music</v-icon>
-          </div>
-          <div class="navbar-left__text">sets</div>
+          <div
+            class="navbar-left__text"
+            :class="item.name === view ? 'blue--text' : 'black--text'"
+          >{{item.name}}</div>
         </div>
       </div>
     </v-navigation-drawer>
@@ -53,11 +50,14 @@
     <v-content>
       <Home
         v-show="view === 'home'"
+        key="home"
         :userData="userData"
         @setPlayer="handleSetPlayer"
         @changeStation="changeStation"
         @deleteStation="deleteStation"
       ></Home>
+
+      <Sets v-show="view === 'sets'" key="sets"></Sets>
 
       <!-- snackbar -->
       <v-snackbar v-model="snackbar" :timeout="4000" bottom right>
@@ -94,6 +94,7 @@ import Station from "./classes/Station";
 
 import AddStationModal from "./components/AddStationModal";
 import Home from "./views/Home";
+import Sets from "./views/Sets";
 import Footer from "./components/Footer";
 import HelloWorld from "./components/HelloWorld";
 
@@ -103,6 +104,7 @@ export default {
     vueHeadful,
     AddStationModal,
     Home,
+    Sets,
     Footer,
     HelloWorld
   },
@@ -113,7 +115,17 @@ export default {
     currentStation: null,
     dialog: false,
     player: null,
-    view: "home",
+    view: "sets",
+    views: [
+      {
+        name: "home",
+        icon: "home"
+      },
+      {
+        name: "sets",
+        icon: "library_music"
+      }
+    ],
     //snackbar data
     snackbar: false,
     snackbarText: "",
@@ -251,10 +263,9 @@ export default {
     this.currentStation = this.userData.stations[0];
   },
   mounted() {
-    this.player.loadVideoById(this.userData.stations[0].id).then(()=>{
+    this.player.loadVideoById(this.userData.stations[0].id).then(() => {
       this.player.stopVideo();
       this.volume = this.userData.prevVolume;
-
     });
     this.addListeners();
   }
@@ -290,6 +301,10 @@ export default {
     margin-top: 30px;
     font-size: 12px;
     color: black;
+
+    &:hover {
+      cursor: pointer;
+    }
 
     & * {
       text-align: center;

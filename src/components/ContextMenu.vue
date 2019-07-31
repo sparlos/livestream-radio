@@ -33,6 +33,9 @@ export default {
     delete() {
       let snackbarText = `Deleted ${this.station.name} from your stations.`;
       this.$emit('deleteStation', this.stationIndex, snackbarText);
+    },
+    addToSet() {
+      
     }
   },
   computed: {
@@ -41,6 +44,10 @@ export default {
         {
           title: "Delete from your stations",
           action: this.delete
+        },
+        {
+          title: "Add to set",
+          action: this.addToSet
         }
       ];
     }
