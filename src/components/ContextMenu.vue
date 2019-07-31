@@ -35,20 +35,20 @@ export default {
       this.$emit('deleteStation', this.stationIndex, snackbarText);
     },
     addToSet() {
-      
+      this.$emit('addToSet', this.station);
     }
   },
   computed: {
     menuOptions() {
       return [
         {
+          title: "Add to set",
+          action: this.addToSet
+        },
+        {
           title: "Delete from your stations",
           action: this.delete
         },
-        {
-          title: "Add to set",
-          action: this.addToSet
-        }
       ];
     }
   }

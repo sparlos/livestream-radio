@@ -22,6 +22,7 @@
                 color="white" 
                 type="station"
                 @deleteStation="handleDeleteStation" 
+                @addToSet="handleAddToSet"
                 :station="station" 
                 :stationIndex="i"></ContextMenu>
             </div>
@@ -50,6 +51,9 @@ export default {
   methods: {
     handleDeleteStation(stationIndex, snackbarText) {
       this.$emit('deleteStation', stationIndex, snackbarText);
+    },
+    handleAddToSet(station) {
+      this.$emit('addToSet', station);
     }
   }
 };

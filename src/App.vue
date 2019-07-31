@@ -23,7 +23,12 @@
       width="100"
     >
       <div class="navbar-left">
-        <div class="navbar-left__item" v-for="(item, i) in views" :key="i" @click="view = item.name">
+        <div
+          class="navbar-left__item"
+          v-for="(item, i) in views"
+          :key="i"
+          @click="view = item.name"
+        >
           <div class="navbar-left__icon">
             <v-icon :color="item.name === view ? 'blue' : 'black'">{{item.icon}}</v-icon>
           </div>
@@ -35,6 +40,7 @@
       </div>
     </v-navigation-drawer>
 
+    <!-- add station button & modal -->
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
         <div class="add-button">
@@ -47,6 +53,16 @@
       <AddStationModal @addStation="addStation" @closeDialog="dialog = false"></AddStationModal>
     </v-dialog>
 
+    <!-- set modal -->
+    <v-dialog v-model="setModal" max-width="600px">
+      <SetModal
+        @closeDialog="setModal = false"
+        @createSet="createSet"
+        @addToSet="handleAddToSet"
+        :sets="userData.sets"
+      ></SetModal>
+    </v-dialog>
+
     <v-content>
       <Home
         v-show="view === 'home'"
@@ -55,9 +71,10 @@
         @setPlayer="handleSetPlayer"
         @changeStation="changeStation"
         @deleteStation="deleteStation"
+        @addToSet="addToSet"
       ></Home>
 
-      <Sets v-show="view === 'sets'" key="sets"></Sets>
+      <Sets v-show="view === 'sets'" key="sets" :sets="userData.sets"></Sets>
 
       <!-- snackbar -->
       <v-snackbar v-model="snackbar" :timeout="4000" bottom right>
@@ -91,8 +108,10 @@
 import vueHeadful from "vue-headful";
 
 import Station from "./classes/Station";
+import Set from "./classes/Set";
 
 import AddStationModal from "./components/AddStationModal";
+import SetModal from "./components/SetModal";
 import Home from "./views/Home";
 import Sets from "./views/Sets";
 import Footer from "./components/Footer";
@@ -103,6 +122,7 @@ export default {
   components: {
     vueHeadful,
     AddStationModal,
+    SetModal,
     Home,
     Sets,
     Footer,
@@ -113,9 +133,13 @@ export default {
     playing: false,
     volume: 100,
     currentStation: null,
+    //modal data
     dialog: false,
+    setModal: false,
+    setModalStation: null,
     player: null,
-    view: "sets",
+    //view data
+    view: "home",
     views: [
       {
         name: "home",
@@ -206,6 +230,18 @@ export default {
       this.snackbar = false;
       this.updateLocalStorage();
     },
+    //set methods
+    addToSet(station) {
+      this.setModal = true;
+      this.setModalStation = station;
+    },
+    handleAddToSet(setIndex) {
+      this.userData.sets[setIndex].add(this.setModalStation);
+    },
+    createSet(name, description) {
+      this.userData.sets.push(new Set(name, description, this.setModalStation));
+      this.updateLocalStorage();
+    },
     //storage methods
     updateLocalStorage() {
       localStorage.setItem("userData", JSON.stringify(this.userData));
@@ -225,7 +261,7 @@ export default {
       document.addEventListener("keypress", e => {
         switch (e.code) {
           case "Space":
-            if (!this.dialog) {
+            if (!this.dialog && !this.setModal) {
               e.preventDefault();
               this.toggleVideo();
             }
@@ -243,24 +279,24 @@ export default {
   },
   beforeMount() {
     //debug seed data
-    // let stationSeedData = [
-    //   new Station(
-    //     "Lofi Hip Hop",
-    //     "https://www.youtube.com/watch?v=hHW1oY26kxQ"
-    //   ),
-    //   new Station(
-    //     "Lofi Hip Hop 2",
-    //     "https://www.youtube.com/watch?v=SGwXjk8MsWY"
-    //   )
-    // ];
-    // this.userData.stations = stationSeedData;
-    // this.userData.sets = "here are some sets";
-    // this.userData.prevVolume = 50;
-    // this.updateLocalStorage();
+    let stationSeedData = [
+      new Station(
+        "Lofi Hip Hop",
+        "https://www.youtube.com/watch?v=hHW1oY26kxQ"
+      ),
+      new Station(
+        "Lofi Hip Hop 2",
+        "https://www.youtube.com/watch?v=SGwXjk8MsWY"
+      )
+    ];
+    this.userData.stations = stationSeedData;
+    this.userData.sets = [];
+    this.userData.prevVolume = 50;
+    this.updateLocalStorage();
+    this.currentStation = this.userData.stations[0];
     // debug ends here
 
     this.loadLocalStorage();
-    this.currentStation = this.userData.stations[0];
   },
   mounted() {
     this.player.loadVideoById(this.userData.stations[0].id).then(() => {

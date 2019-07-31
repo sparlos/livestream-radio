@@ -1,9 +1,9 @@
 <template>
   <v-card>
-    <v-card-title>
-      <span class="headline blue--text">Add a new station</span>
-    </v-card-title>
     <v-card-text>
+      <v-card-title>
+        <span class="headline blue--text">Add a new station</span>
+      </v-card-title>
       <v-form v-model="valid" ref="form">
         <v-container gris-list-md>
           <v-layout wrap>
@@ -29,12 +29,12 @@
         </v-container>
       </v-form>
       <small>*indicates required field</small>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue" text @click="close">Close</v-btn>
+        <v-btn color="blue" text @click="validate">Add</v-btn>
+      </v-card-actions>
     </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="blue" text @click="close">Close</v-btn>
-      <v-btn color="blue" text @click="validate">Add</v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 
@@ -43,8 +43,8 @@ export default {
   name: "AddStationModal",
   data: () => ({
     valid: false,
-    name: '',
-    url: '',
+    name: "",
+    url: "",
     nameRules: [v => !!v || "Name is required"],
     urlRules: [
       v => !!v || "URL is required",
@@ -53,13 +53,13 @@ export default {
   }),
   methods: {
     close() {
-      this.$emit('closeDialog');
+      this.$emit("closeDialog");
       this.$refs.form.resetValidation();
     },
     validate() {
       if (this.$refs.form.validate()) {
-        this.$emit('closeDialog');
-        this.$emit('addStation', this.name, this.url);
+        this.$emit("closeDialog");
+        this.$emit("addStation", this.name, this.url);
         this.$refs.form.reset();
         this.$refs.form.resetValidation();
       }

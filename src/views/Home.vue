@@ -3,6 +3,7 @@
     <RecentStations
       @changeStation="changeStation"
       @deleteStation="handleDeleteStation"
+      @addToSet="handleAddToSet"
       :stations="userData.stations"
     ></RecentStations>
     <v-container fluid>
@@ -53,6 +54,9 @@ export default {
     },
     handleDeleteStation(stationIndex, snackbarText) {
       this.$emit("deleteStation", stationIndex, snackbarText);
+    },
+    handleAddToSet(station) {
+      this.$emit('addToSet', station);
     }
   },
   mounted() {
