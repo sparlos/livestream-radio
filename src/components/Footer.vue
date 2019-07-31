@@ -1,9 +1,9 @@
 <template>
   <v-footer app elevation="8" color="white" height="90">
     <div class="footer-image">
-      <v-img src="https://img.youtube.com/vi/hHW1oY26kxQ/sddefault.jpg" aspect-ratio=".8"></v-img>
+      <v-img :src="currentStation.imageUrl" aspect-ratio=".8"></v-img>
     </div>
-    <div class="footer-text">Station Name</div>
+    <div class="footer-text">{{currentStation.name}}</div>
     <v-layout align-center justify-center>
       <v-btn v-for="icon in icons" :key="icon.name" v-bind="icon.attributes" @click="$emit('footerClick', icon.name, $event)">
         <v-icon dark v-if="icon.name !== 'play_arrow'">{{icon.name}}</v-icon>
@@ -44,7 +44,8 @@ export default {
   name: "Footer",
   props: {
     playing: Boolean,
-    volume: Number
+    volume: Number,
+    currentStation: Object
   },
   data: () => ({
     icons: [
@@ -80,7 +81,6 @@ export default {
   height: 100%;
   width: 6.5rem;
   margin-left: -1rem;
-  background-color: red;
 }
 
 .footer-text {
