@@ -34,8 +34,13 @@
     </v-dialog>
 
     <!-- edit set modal -->
-    <v-dialog v-model="editSetModal">
-      
+    <v-dialog v-model="editSetModal" max-width="600px">
+      <EditSetModal
+        :set="viewedSet"
+        :setIndex="viewedSetIndex"
+        @closeDialog="editSetModal = false"
+        @updateSet="updateSet"
+        ></EditSetModal>
     </v-dialog>
 
     <v-content>
@@ -64,6 +69,7 @@
         :set="viewedSet"
         :setIndex="viewedSetIndex"
         @deleteSet="deleteSet"
+        @triggerModal="triggerEditSetModal"
       ></SetView>
 
       <!-- snackbar -->
@@ -100,8 +106,11 @@ import Station from "./classes/Station";
 import Set from "./classes/Set";
 
 import AppBars from "./components/AppBars";
+// modal imports
 import AddStationModal from "./components/AddStationModal";
 import SetModal from "./components/SetModal";
+import EditSetModal from "./components/EditSetModal";
+
 import Home from "./views/Home";
 import Sets from "./views/Sets";
 import SetView from "./views/SetView";
@@ -114,6 +123,7 @@ export default {
     vueHeadful,
     AppBars,
     AddStationModal,
+    EditSetModal,
     SetModal,
     Home,
     Sets,
@@ -134,6 +144,7 @@ export default {
     dialog: false,
     setModal: false,
     setModalStation: null,
+    editSetModal: false,
     player: null,
     //view data
     view: "home",
@@ -156,6 +167,10 @@ export default {
       return this.playing
         ? this.currentStation.name + " - Livestream Radio"
         : "Livestream Radio";
+    },
+    modalOpen() {
+      if(this.dialog || this.setModal || this.editSetModal) return true;
+      return false;
     }
   },
   methods: {
@@ -286,6 +301,13 @@ export default {
       this.userData.sets.splice(index, 1);
       this.triggerSnackbar(snackbarText, snackbarButton);
     },
+    triggerEditSetModal() {
+      this.editSetModal = true;
+    },
+    updateSet(index, name, description) {
+      this.$set(this.userData.sets[index], 'name', name);
+      this.$set(this.userData.sets[index], 'description', description);
+    },
     //storage methods
     updateLocalStorage() {
       localStorage.setItem("userData", JSON.stringify(this.userData));
@@ -305,7 +327,7 @@ export default {
       document.addEventListener("keypress", e => {
         switch (e.code) {
           case "Space":
-            if (!this.dialog && !this.setModal) {
+            if (!this.modalOpen) {
               e.preventDefault();
               this.toggleVideo();
             }

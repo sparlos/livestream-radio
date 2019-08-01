@@ -22,7 +22,7 @@
           <v-flex d-flex mt-1 shrink>
             <v-layout align-center>
               <v-flex shrink="0" mr-5>
-                <v-btn text color-text="black">
+                <v-btn text color-text="black" @click="$emit('triggerModal')">
                   <v-icon left>mdi-pencil</v-icon>Edit
                 </v-btn>
               </v-flex>
