@@ -50,7 +50,7 @@
           <v-card-text>
             <v-layout justify-start mt-2>
               <v-flex v-for="(station, i) in set.stations" :key="i" mb-8 shrink mx-3>
-                <Station :station="station"></Station>
+                <Station :station="station" @changeStation="$emit('changeStation', station)"></Station>
               </v-flex>
             </v-layout>
           </v-card-text>

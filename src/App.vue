@@ -70,6 +70,7 @@
         :setIndex="viewedSetIndex"
         @deleteSet="deleteSet"
         @triggerModal="triggerEditSetModal"
+        @changeStation="changeStation"
       ></SetView>
 
       <!-- snackbar -->
@@ -230,12 +231,6 @@ export default {
     },
     //station methods
     changeStation(station, stationIndex) {
-      //check if station is in current set; if not, unload current set
-      // if (this.currentSet.name && !this.currentSet.contains(station)) {
-      //   this.currentSet = {};
-      //   this.triggerSnackbar("current set unloaded", "close");
-      // }
-
       this.currentStation = station;
       this.currentStationIndex = stationIndex;
       this.playing = true;
@@ -296,6 +291,9 @@ export default {
     deleteSet(index, snackbarText, snackbarButton, set) {
       if(this.view === 'set' && this.viewedSet === set) {
         this.changeView('home');
+      }
+      if(this.userData.sets[0] === this.currentSet) {
+        this.currentSet = {};
       }
 
       this.userData.sets.splice(index, 1);

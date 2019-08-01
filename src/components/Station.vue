@@ -1,9 +1,16 @@
 <template>
-  <div class="station elevation-5" :style="{backgroundImage: 'url(' + station.imageUrl + ')'}">
-    <div class="station__name caption black--text">
-      {{station.name}}
+  <v-hover v-slot:default="{ hover }">
+    <div class="station elevation-5" :style="{backgroundImage: 'url(' + station.imageUrl + ')'}">
+      <div class="station__name caption black--text">
+        {{station.name}}
+      </div>
+      <div class="station__icon" v-if="hover">
+        <v-btn fab color="white" @click="$emit('changeStation', station)">
+          <v-icon class="station__icon" dark large>play_arrow</v-icon>
+        </v-btn>
+      </div>
     </div>
-  </div>
+  </v-hover>
 </template>
 
 <script>
@@ -32,6 +39,18 @@ export default {
     left: 50%;
     white-space: nowrap;
     transform: translateX(-50%);
+  }
+
+  &__icon {
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 }
 </style>

@@ -28,7 +28,7 @@
               <v-layout v-if="!currentSet.name">No set loaded!</v-layout>
               <v-layout v-else wrap justify-start align-content-start>
                 <v-flex v-for="(station, i) in currentSet.stations" :key="i" mb-12 mr-5 d-flex shrink="0">
-                  <Station :station="station"></Station>
+                  <Station :station="station" @changeStation="$emit('changeStation', station)"></Station>
                 </v-flex>
               </v-layout>
             </v-flex>
