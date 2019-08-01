@@ -32,7 +32,8 @@ export default {
   methods: {
     delete() {
       let snackbarText = `Deleted ${this.station.name} from your stations.`;
-      this.$emit('deleteStation', this.stationIndex, snackbarText);
+      let snackbarButton = 'undo';
+      this.$emit('deleteStation', this.stationIndex, snackbarText, snackbarButton);
     },
     addToSet() {
       this.$emit('addToSet', this.station);

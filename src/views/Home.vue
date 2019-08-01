@@ -17,14 +17,18 @@
         </v-flex>
         <v-flex d-flex xs5 px-5 wrap>
           <v-layout wrap align-content-start>
-            <v-flex display-1>Stations in this Set</v-flex>
+            <v-flex display-1 class="text-no-wrap">
+              <span v-if="currentSet.name">Stations in "{{currentSet.name}}"</span>
+              <span v-else>Stations in this Set</span>
+            </v-flex>
             <v-flex mt-3 mb-6 xs12>
               <div class="title-underline blue"></div>
             </v-flex>
-            <v-flex d-flex xs12>
-              <v-layout wrap justify-space-around align-content-start>
-                <v-flex v-for="i in 8" :key="i" mb-12 d-flex>
-                  <Station></Station>
+            <v-flex d-flex xs12 justify-start>
+              <v-layout v-if="!currentSet.name">No set loaded!</v-layout>
+              <v-layout v-else wrap justify-start align-content-start>
+                <v-flex v-for="(station, i) in currentSet.stations" :key="i" mb-12 mr-5 d-flex shrink="0">
+                  <Station :station="station"></Station>
                 </v-flex>
               </v-layout>
             </v-flex>
@@ -46,17 +50,18 @@ export default {
     Station
   },
   props: {
-    userData: Object
+    userData: Object,
+    currentSet: Object
   },
   methods: {
-    changeStation(station) {
-      this.$emit("changeStation", station);
+    changeStation(station, stationIndex) {
+      this.$emit("changeStation", station, stationIndex);
     },
-    handleDeleteStation(stationIndex, snackbarText) {
-      this.$emit("deleteStation", stationIndex, snackbarText);
+    handleDeleteStation(stationIndex, snackbarText, snackbarButton) {
+      this.$emit("deleteStation", stationIndex, snackbarText, snackbarButton);
     },
     handleAddToSet(station) {
-      this.$emit('addToSet', station);
+      this.$emit("addToSet", station);
     }
   },
   mounted() {

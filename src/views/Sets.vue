@@ -5,7 +5,7 @@
         <v-flex xs12 mb-6>
           <div class="title">Your Sets</div>
         </v-flex>
-        <v-flex v-for="(set, i) in sets" :key="i" mb-10>
+        <v-flex v-for="(set, i) in sets" :key="i" mb-10 mr-5 shrink="0">
           <v-card class="mr-3" width="200">
             <div
               class="set-thumbnail"
@@ -14,8 +14,10 @@
             <v-card-text class="black--text">
               {{set.name}}
               <br />
-              {{set.stations.length}} 
-              {{set.stations.length <= 1 ? 'station' : 'stations'}}
+              <span class="grey--text">
+                {{set.stations.length}} 
+                {{set.stations.length <= 1 ? 'station' : 'stations'}}
+              </span>
             </v-card-text>
           </v-card>
         </v-flex>

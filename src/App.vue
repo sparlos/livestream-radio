@@ -6,39 +6,7 @@
       :description="`listening to ${currentStation.name} on Livestream Radio`"
     ></vue-headful>
 
-    <v-app-bar app clipped-left clipped-right>
-      <div class="app-bar-heading">
-        <span class="font-weight-medium">Livestream</span>
-        <span class="blue--text">Radio</span>
-      </div>
-    </v-app-bar>
-
-    <v-navigation-drawer
-      app
-      color="grey lighten-5"
-      floating
-      clipped
-      permanent
-      height="200"
-      width="100"
-    >
-      <div class="navbar-left">
-        <div
-          class="navbar-left__item"
-          v-for="(item, i) in views"
-          :key="i"
-          @click="view = item.name"
-        >
-          <div class="navbar-left__icon">
-            <v-icon :color="item.name === view ? 'blue' : 'black'">{{item.icon}}</v-icon>
-          </div>
-          <div
-            class="navbar-left__text"
-            :class="item.name === view ? 'blue--text' : 'black--text'"
-          >{{item.name}}</div>
-        </div>
-      </div>
-    </v-navigation-drawer>
+    <AppBars :view="view" @changeView="changeView"></AppBars>
 
     <!-- add station button & modal -->
     <v-dialog v-model="dialog" max-width="600px">
@@ -67,6 +35,7 @@
       <Home
         v-show="view === 'home'"
         key="home"
+        :currentSet="currentSet"
         :userData="userData"
         @setPlayer="handleSetPlayer"
         @changeStation="changeStation"
@@ -74,18 +43,17 @@
         @addToSet="addToSet"
       ></Home>
 
-      <Sets v-show="view === 'sets'" key="sets" :sets="userData.sets"></Sets>
+      <Sets v-show="view === 'sets'" key="sets" :sets="userData.sets" :currentSet="currentSet"></Sets>
 
       <!-- snackbar -->
       <v-snackbar v-model="snackbar" :timeout="4000" bottom right>
         {{snackbarText}}
-        <v-btn color="pink" text @click="undoDeleteStation">Undo</v-btn>
+        <v-btn color="pink" text @click="handleSnackbarMethod">{{snackbarButton}}</v-btn>
       </v-snackbar>
     </v-content>
 
     <Footer
       @footerClick="handleFooterClick"
-      @volumeChange="handleVolumeChange"
       :playing="playing"
       :volume.sync="volume"
       :currentStation="currentStation"
@@ -110,6 +78,7 @@ import vueHeadful from "vue-headful";
 import Station from "./classes/Station";
 import Set from "./classes/Set";
 
+import AppBars from "./components/AppBars";
 import AddStationModal from "./components/AddStationModal";
 import SetModal from "./components/SetModal";
 import Home from "./views/Home";
@@ -121,6 +90,7 @@ export default {
   name: "App",
   components: {
     vueHeadful,
+    AppBars,
     AddStationModal,
     SetModal,
     Home,
@@ -133,6 +103,8 @@ export default {
     playing: false,
     volume: 100,
     currentStation: null,
+    currentStationIndex: 0,
+    currentSet: {},
     //modal data
     dialog: false,
     setModal: false,
@@ -140,19 +112,10 @@ export default {
     player: null,
     //view data
     view: "home",
-    views: [
-      {
-        name: "home",
-        icon: "home"
-      },
-      {
-        name: "sets",
-        icon: "library_music"
-      }
-    ],
     //snackbar data
     snackbar: false,
     snackbarText: "",
+    snackbarButton: "",
     //undo data
     deletedStation: null,
     //user data
@@ -172,9 +135,34 @@ export default {
   },
   methods: {
     //snackbar methods
-    triggerSnackbar(text) {
+    triggerSnackbar(text, button) {
       this.snackbar = true;
       this.snackbarText = text;
+      this.snackbarButton = button;
+    },
+    handleSnackbarMethod() {
+      switch (this.snackbarButton) {
+        case "undo":
+          this.undoDeleteStation();
+          break;
+        case "close":
+          this.snackbar = false;
+        default:
+          break;
+      }
+    },
+    undoDeleteStation() {
+      this.userData.stations.splice(
+        this.deletedStation.index,
+        0,
+        this.deletedStation.station
+      );
+      this.snackbar = false;
+      this.updateLocalStorage();
+    },
+    //view methods
+    changeView(view) {
+      this.view = view;
     },
     //footer methods
     handleFooterClick(buttonName, event) {
@@ -191,7 +179,6 @@ export default {
           break;
       }
     },
-    handleVolumeChange() {},
     //video methods
     handleSetPlayer(player) {
       this.player = player;
@@ -202,41 +189,60 @@ export default {
       this.playing = !this.playing;
     },
     //station methods
-    changeStation(station) {
+    changeStation(station, stationIndex) {
+      //check if station is in current set; if not, unload current set
+      if (this.currentSet.name && !this.currentSet.contains(station)) {
+        this.currentSet = {};
+        this.triggerSnackbar("current set unloaded", "close");
+      }
+
       this.currentStation = station;
+      this.currentStationIndex = stationIndex;
       this.playing = true;
 
       this.player.loadVideoById(station.id);
+    },
+    nextStation() {
+      //if set loaded
+      if (this.currentSet) {
+        //
+      } else {
+      }
     },
     addStation(name, url) {
       this.userData.stations.push(new Station(name, url));
       this.updateLocalStorage();
     },
-    deleteStation(stationIndex, snackbarText) {
+    deleteStation(stationIndex, snackbarText, snackbarButton) {
       this.deletedStation = {
         station: this.userData.stations[stationIndex],
         index: stationIndex
       };
-      this.triggerSnackbar(snackbarText);
+      this.triggerSnackbar(snackbarText, snackbarButton);
       this.userData.stations.splice(stationIndex, 1);
       this.updateLocalStorage();
     },
-    undoDeleteStation() {
-      this.userData.stations.splice(
-        this.deletedStation.index,
-        0,
-        this.deletedStation.station
-      );
-      this.snackbar = false;
-      this.updateLocalStorage();
-    },
     //set methods
+    createSetsOnLoad() {
+      for (let i = 0; i < this.userData.sets.length; i++) {
+        let setData = this.userData.sets[i];
+        this.userData.sets.splice(
+          i,
+          1,
+          new Set(setData.name, setData.description, setData.initialStation)
+        );
+      }
+    },
     addToSet(station) {
       this.setModal = true;
       this.setModalStation = station;
     },
     handleAddToSet(setIndex) {
-      this.userData.sets[setIndex].add(this.setModalStation);
+      if(this.userData.sets[setIndex].contains(this.setModalStation)) {
+        this.triggerSnackbar('station already exists in set!', 'close');
+      } else {
+        this.userData.sets[setIndex].add(this.setModalStation);
+      }
     },
     createSet(name, description) {
       this.userData.sets.push(new Set(name, description, this.setModalStation));
@@ -287,16 +293,31 @@ export default {
       new Station(
         "Lofi Hip Hop 2",
         "https://www.youtube.com/watch?v=SGwXjk8MsWY"
+      ),
+      new Station(
+        "Hype Radio",
+        "https://www.youtube.com/watch?v=GVC5adzPpiE"
       )
     ];
     this.userData.stations = stationSeedData;
-    this.userData.sets = [];
+    this.userData.sets = [
+      new Set("Skrubtown Radio", "this is a skrub station", stationSeedData[0])
+    ];
     this.userData.prevVolume = 50;
-    this.updateLocalStorage();
     this.currentStation = this.userData.stations[0];
+    this.currentStationIndex = 0;
+    this.updateLocalStorage();
+
     // debug ends here
 
     this.loadLocalStorage();
+
+    //localStorage stores only object data, not class data
+    //on load, recreates Set classes based on localStorage 'set' data
+    this.createSetsOnLoad();
+    this.currentSet = this.userData.sets[0];
+    this.userData.sets[0].add(stationSeedData[2]);
+
   },
   mounted() {
     this.player.loadVideoById(this.userData.stations[0].id).then(() => {
@@ -309,12 +330,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.app-bar-heading {
-  width: 100%;
-  text-align: center;
-  font-size: 1.3rem;
-}
-
 //add button styling
 .add-button {
   position: fixed;
@@ -323,32 +338,5 @@ export default {
   width: 100px;
   height: 100px;
   z-index: 100;
-}
-
-//navbar left styling
-.navbar-left {
-  display: flex;
-  flex-wrap: wrap;
-
-  &__item {
-    flex: 0 1 100%;
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 30px;
-    font-size: 12px;
-    color: black;
-
-    &:hover {
-      cursor: pointer;
-    }
-
-    & * {
-      text-align: center;
-      flex: 0 1 100%;
-    }
-  }
-  width: 100%;
-  display: flex;
-  justify-content: center;
 }
 </style>

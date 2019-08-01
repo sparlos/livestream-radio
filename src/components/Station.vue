@@ -1,7 +1,7 @@
 <template>
-  <div class="station elevation-5" :style="{backgroundImage: 'url(' + image + ')'}">
+  <div class="station elevation-5" :style="{backgroundImage: 'url(' + station.imageUrl + ')'}">
     <div class="station__name caption">
-      Station Name
+      {{station.name}}
     </div>
   </div>
 </template>
@@ -9,9 +9,9 @@
 <script>
 export default {
   name: 'Station',
-  data: () => ({
-    image: "https://img.youtube.com/vi/hHW1oY26kxQ/sddefault.jpg"
-  })
+  props: {
+    station: Object
+  }
 }
 
 </script>

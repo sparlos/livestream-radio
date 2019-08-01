@@ -26,7 +26,7 @@
                 :station="station" 
                 :stationIndex="i"></ContextMenu>
             </div>
-            <div class="thumbnail__play" v-if="hover" @click="$emit('changeStation', station)">
+            <div class="thumbnail__play" v-if="hover" @click="$emit('changeStation', station, i)">
               <v-icon color="white">play_circle_filled</v-icon>
             </div>
             <div class="thumbnail__text subtitle-2" v-if="hover">{{station.name}}</div>
@@ -49,8 +49,8 @@ export default {
     stations: Array
   },
   methods: {
-    handleDeleteStation(stationIndex, snackbarText) {
-      this.$emit('deleteStation', stationIndex, snackbarText);
+    handleDeleteStation(stationIndex, snackbarText, snackbarButton) {
+      this.$emit('deleteStation', stationIndex, snackbarText, snackbarButton);
     },
     handleAddToSet(station) {
       this.$emit('addToSet', station);

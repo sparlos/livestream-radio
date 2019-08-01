@@ -69,7 +69,14 @@ export default {
   data: () => ({
     newSetValid: false,
     existingSet: "",
-    existingSetRules: [v => !!v || "You must select an option"],
+    existingSetRules: [
+      (v) => { 
+        if(v===0) {
+          return true;
+        }
+        return (!!v || "You must select an option")
+      }
+      ],
     setName: "",
     setNameRules: [v => !!v || "Name is required"],
     setDescription: "",
@@ -98,7 +105,7 @@ export default {
       if (this.$refs.existingSet.validate()) {
         this.$emit("closeDialog");
         this.$emit("addToSet", this.existingSet);
-        this.$refs.exisitingSet.reset();
+        this.$refs.existingSet.reset();
         this.$refs.existingSet.resetValidation();
       }
     },
