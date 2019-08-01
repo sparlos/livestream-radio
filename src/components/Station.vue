@@ -1,6 +1,6 @@
 <template>
   <div class="station elevation-5" :style="{backgroundImage: 'url(' + station.imageUrl + ')'}">
-    <div class="station__name caption">
+    <div class="station__name caption black--text">
       {{station.name}}
     </div>
   </div>

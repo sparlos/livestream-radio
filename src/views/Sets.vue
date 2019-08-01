@@ -8,6 +8,7 @@
         <v-flex v-for="(set, i) in sets" :key="i" mb-10 mr-5 shrink="0">
           <v-card class="mr-3" width="200">
             <div
+              @click="$emit('changeViewedSet', set, i)"
               class="set-thumbnail"
               :style="{backgroundImage: 'url(' + set.stations[set.stations.length-1].imageUrl + ')'}"
             ></div>
@@ -16,7 +17,7 @@
               <br />
               <span class="grey--text">
                 {{set.stations.length}} 
-                {{set.stations.length <= 1 ? 'station' : 'stations'}}
+                {{1 >= set.stations.length ? 'station' : 'stations'}}
               </span>
             </v-card-text>
           </v-card>
@@ -44,5 +45,9 @@ export default {
   height: 200px;
   background-size: 175% 140%;
   background-position: 50% 50%;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
 </style>

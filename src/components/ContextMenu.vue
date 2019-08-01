@@ -5,11 +5,7 @@
         <v-icon :color="color" v-on="on">more_vertical</v-icon>
       </template>
       <v-list>
-        <v-list-item
-          v-for="(option, i) in menuOptions"
-          :key="i"
-          @click="option.action"
-        >
+        <v-list-item v-for="(option, i) in menuOptions" :key="i" @click="option.action">
           <v-list-item-title>{{option.title}}</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -24,33 +20,66 @@ export default {
     color: String,
     type: String,
     station: Object,
-    stationIndex: Number
+    stationIndex: Number,
+    set: Object,
+    setIndex: Number
   },
   data: () => ({
     showMenu: false
   }),
   methods: {
-    delete() {
+    deleteStation() {
       let snackbarText = `Deleted ${this.station.name} from your stations.`;
-      let snackbarButton = 'undo';
-      this.$emit('deleteStation', this.stationIndex, snackbarText, snackbarButton);
+      let snackbarButton = "undo";
+      this.$emit(
+        "deleteStation",
+        this.stationIndex,
+        snackbarText,
+        snackbarButton
+      );
+    },
+    deleteSet() {
+      let snackbarText = `Deleted ${this.set.name} from your sets.`;
+      let snackbarButton = "close";
+      this.$emit(
+        "deleteSet",
+        this.setIndex,
+        snackbarText,
+        snackbarButton
+      )
     },
     addToSet() {
-      this.$emit('addToSet', this.station);
+      this.$emit("addToSet", this.station);
     }
   },
   computed: {
     menuOptions() {
-      return [
-        {
-          title: "Add to set",
-          action: this.addToSet
-        },
-        {
-          title: "Delete from your stations",
-          action: this.delete
-        },
-      ];
+      switch (this.type) {
+        case "station":
+          return [
+            {
+              title: "Add to set",
+              action: this.addToSet
+            },
+            {
+              title: "Delete from your stations",
+              action: this.deleteStation
+            }
+          ];
+          break;
+        
+        case "set":
+          return [
+            {
+              title: "Delete set",
+              action: this.deleteSet
+            }
+          ]
+          break;
+
+        default:
+          break;
+      }
     }
   }
 };

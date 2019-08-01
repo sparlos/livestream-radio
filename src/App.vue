@@ -8,6 +8,8 @@
 
     <AppBars :view="view" @changeView="changeView"></AppBars>
 
+    <!-- ==== MODALS ===== -->
+
     <!-- add station button & modal -->
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
@@ -31,6 +33,11 @@
       ></SetModal>
     </v-dialog>
 
+    <!-- edit set modal -->
+    <v-dialog v-model="editSetModal">
+      
+    </v-dialog>
+
     <v-content>
       <Home
         v-show="view === 'home'"
@@ -43,7 +50,21 @@
         @addToSet="addToSet"
       ></Home>
 
-      <Sets v-show="view === 'sets'" key="sets" :sets="userData.sets" :currentSet="currentSet"></Sets>
+      <Sets
+        v-show="view === 'sets'"
+        key="sets"
+        :sets="userData.sets"
+        :currentSet="currentSet"
+        @changeViewedSet="changeViewedSet"
+      ></Sets>
+
+      <SetView
+        v-show="view === 'set'"
+        key="set"
+        :set="viewedSet"
+        :setIndex="viewedSetIndex"
+        @deleteSet="deleteSet"
+      ></SetView>
 
       <!-- snackbar -->
       <v-snackbar v-model="snackbar" :timeout="4000" bottom right>
@@ -83,6 +104,7 @@ import AddStationModal from "./components/AddStationModal";
 import SetModal from "./components/SetModal";
 import Home from "./views/Home";
 import Sets from "./views/Sets";
+import SetView from "./views/SetView";
 import Footer from "./components/Footer";
 import HelloWorld from "./components/HelloWorld";
 
@@ -95,6 +117,7 @@ export default {
     SetModal,
     Home,
     Sets,
+    SetView,
     Footer,
     HelloWorld
   },
@@ -105,6 +128,8 @@ export default {
     currentStation: null,
     currentStationIndex: 0,
     currentSet: {},
+    viewedSet: {},
+    viewedSetIndex: null,
     //modal data
     dialog: false,
     setModal: false,
@@ -191,10 +216,10 @@ export default {
     //station methods
     changeStation(station, stationIndex) {
       //check if station is in current set; if not, unload current set
-      if (this.currentSet.name && !this.currentSet.contains(station)) {
-        this.currentSet = {};
-        this.triggerSnackbar("current set unloaded", "close");
-      }
+      // if (this.currentSet.name && !this.currentSet.contains(station)) {
+      //   this.currentSet = {};
+      //   this.triggerSnackbar("current set unloaded", "close");
+      // }
 
       this.currentStation = station;
       this.currentStationIndex = stationIndex;
@@ -233,13 +258,18 @@ export default {
         );
       }
     },
+    changeViewedSet(set, index) {
+      this.viewedSet = set;
+      this.viewedSetIndex = index;
+      this.changeView("set");
+    },
     addToSet(station) {
       this.setModal = true;
       this.setModalStation = station;
     },
     handleAddToSet(setIndex) {
-      if(this.userData.sets[setIndex].contains(this.setModalStation)) {
-        this.triggerSnackbar('station already exists in set!', 'close');
+      if (this.userData.sets[setIndex].contains(this.setModalStation)) {
+        this.triggerSnackbar("station already exists in set!", "close");
       } else {
         this.userData.sets[setIndex].add(this.setModalStation);
       }
@@ -247,6 +277,14 @@ export default {
     createSet(name, description) {
       this.userData.sets.push(new Set(name, description, this.setModalStation));
       this.updateLocalStorage();
+    },
+    deleteSet(index, snackbarText, snackbarButton, set) {
+      if(this.view === 'set' && this.viewedSet === set) {
+        this.changeView('home');
+      }
+
+      this.userData.sets.splice(index, 1);
+      this.triggerSnackbar(snackbarText, snackbarButton);
     },
     //storage methods
     updateLocalStorage() {
@@ -294,10 +332,7 @@ export default {
         "Lofi Hip Hop 2",
         "https://www.youtube.com/watch?v=SGwXjk8MsWY"
       ),
-      new Station(
-        "Hype Radio",
-        "https://www.youtube.com/watch?v=GVC5adzPpiE"
-      )
+      new Station("Hype Radio", "https://www.youtube.com/watch?v=GVC5adzPpiE")
     ];
     this.userData.stations = stationSeedData;
     this.userData.sets = [
@@ -317,7 +352,6 @@ export default {
     this.createSetsOnLoad();
     this.currentSet = this.userData.sets[0];
     this.userData.sets[0].add(stationSeedData[2]);
-
   },
   mounted() {
     this.player.loadVideoById(this.userData.stations[0].id).then(() => {
