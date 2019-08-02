@@ -238,9 +238,11 @@ export default {
       this.player = player;
     },
     toggleVideo() {
-      this.playing ? this.player.pauseVideo() : this.player.playVideo();
+      if(this.player && this.currentStation) {
+        this.playing ? this.player.pauseVideo() : this.player.playVideo();
+        this.playing = !this.playing;
+      }
 
-      this.playing = !this.playing;
     },
     //station methods
     changeStation(station, stationIndex) {
