@@ -5,7 +5,7 @@
       <v-card-title>
         <span class="headline blue--text">Add to set</span>
       </v-card-title>
-      <v-form ref="existingSet">
+      <v-form ref="existingSet" @submit.prevent="addToSet"> 
         <v-container>
           <v-layout wrap>
             <v-flex xs12>

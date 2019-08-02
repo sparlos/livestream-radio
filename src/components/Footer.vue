@@ -1,9 +1,9 @@
 <template>
   <v-footer app elevation="8" color="white" height="90">
     <div class="footer-image">
-      <v-img :src="currentStation.imageUrl" aspect-ratio=".8"></v-img>
+      <v-img v-if="currentStation" :src="currentStation.imageUrl" aspect-ratio=".8"></v-img>
     </div>
-    <div class="footer-text">{{currentStation.name}}</div>
+    <div class="footer-text" v-if="currentStation">{{currentStation.name}}</div>
     <v-layout align-center justify-center>
       <v-btn v-for="icon in icons" :key="icon.name" v-bind="icon.attributes" @click="$emit('footerClick', icon.name, $event)">
         <v-icon dark v-if="icon.name !== 'play_arrow'">{{icon.name}}</v-icon>

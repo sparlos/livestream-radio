@@ -11,9 +11,12 @@
         <v-flex offset-xs1 xs5 px-5>
           <div class="display-1">Currently Playing</div>
           <div class="title-underline blue mt-3 mb-6"></div>
-          <v-responsive :aspect-ratio="16/9">
+          <v-responsive v-show="currentStation" :aspect-ratio="16/9">
             <youtube ref="youtube" width="100%" height="100%"></youtube>
           </v-responsive>
+          <span v-show="!currentStation">
+            Nothing is currently playing!
+          </span>
         </v-flex>
         <v-flex d-flex xs5 px-5 wrap>
           <v-layout wrap align-content-start>
@@ -51,7 +54,8 @@ export default {
   },
   props: {
     userData: Object,
-    currentSet: Object
+    currentSet: Object,
+    currentStation: Object
   },
   methods: {
     changeStation(station, stationIndex) {

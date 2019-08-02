@@ -10,7 +10,9 @@
           <v-flex d-flex xs12>
             <v-layout align-center>
               <div class="set-name display-1">{{set.name}}</div>
-              <v-icon color="black" class="ml-1 set-play">play_circle_filled</v-icon>
+              <v-btn fab class="ml-4" dark @click="$emit('loadSet', set)">
+                <v-icon>play_arrow</v-icon>
+              </v-btn>
             </v-layout>
           </v-flex>
           <v-flex xs12 class="grey--text">{{set.description}}</v-flex>
@@ -77,7 +79,7 @@ export default {
   computed: {
     displayedImage() {
       return (
-        "url(" + this.set.stations[this.set.stations.length - 1].imageUrl + ")"
+        "url(" + this.set.stations[0].imageUrl + ")"
       );
     }
   },

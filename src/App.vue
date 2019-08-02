@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <!-- vue headful stuff -->
-    <vue-headful
+    <vue-headful v-if="currentStation"
       :title="siteTitle"
       :description="`listening to ${currentStation.name} on Livestream Radio`"
     ></vue-headful>
@@ -40,7 +40,7 @@
         :setIndex="viewedSetIndex"
         @closeDialog="editSetModal = false"
         @updateSet="updateSet"
-        ></EditSetModal>
+      ></EditSetModal>
     </v-dialog>
 
     <v-content>
@@ -48,6 +48,7 @@
         v-show="view === 'home'"
         key="home"
         :currentSet="currentSet"
+        :currentStation="currentStation"
         :userData="userData"
         @setPlayer="handleSetPlayer"
         @changeStation="changeStation"
@@ -61,6 +62,7 @@
         :sets="userData.sets"
         :currentSet="currentSet"
         @changeViewedSet="changeViewedSet"
+        @loadSet="loadSet"
       ></Sets>
 
       <SetView
@@ -71,6 +73,7 @@
         @deleteSet="deleteSet"
         @triggerModal="triggerEditSetModal"
         @changeStation="changeStation"
+        @loadSet="loadSet"
       ></SetView>
 
       <!-- snackbar -->
@@ -116,7 +119,6 @@ import Home from "./views/Home";
 import Sets from "./views/Sets";
 import SetView from "./views/SetView";
 import Footer from "./components/Footer";
-import HelloWorld from "./components/HelloWorld";
 
 export default {
   name: "App",
@@ -129,8 +131,7 @@ export default {
     Home,
     Sets,
     SetView,
-    Footer,
-    HelloWorld
+    Footer
   },
   data: () => ({
     //app data
@@ -139,6 +140,7 @@ export default {
     currentStation: null,
     currentStationIndex: 0,
     currentSet: {},
+    stationInSetIndex: 0,
     viewedSet: {},
     viewedSetIndex: null,
     //modal data
@@ -157,9 +159,8 @@ export default {
     deletedStation: null,
     //user data
     userData: {
-      firstVisit: false,
-      stations: null,
-      sets: null,
+      stations: [],
+      sets: [],
       prevVolume: 10
     }
   }),
@@ -170,7 +171,7 @@ export default {
         : "Livestream Radio";
     },
     modalOpen() {
-      if(this.dialog || this.setModal || this.editSetModal) return true;
+      if (this.dialog || this.setModal || this.editSetModal) return true;
       return false;
     }
   },
@@ -211,9 +212,17 @@ export default {
         case "play_arrow":
           //prevents function from being double triggered
           //if the play button has focus and user presses spacebar
-          if (event.detail == 1) {
+          if (event.detail == 1 && this.currentStation) {
             this.toggleVideo();
           }
+          break;
+
+        case "skip_previous":
+          this.previousStation();
+          break;
+
+        case "skip_next":
+          this.nextStation();
           break;
 
         default:
@@ -233,20 +242,17 @@ export default {
     changeStation(station, stationIndex) {
       this.currentStation = station;
       this.currentStationIndex = stationIndex;
-      this.playing = true;
 
+      this.playing = true;
       this.player.loadVideoById(station.id);
     },
-    nextStation() {
-      //if set loaded
-      if (this.currentSet) {
-        //
-      } else {
-      }
-    },
     addStation(name, url) {
-      this.userData.stations.push(new Station(name, url));
+      let newStation = new Station(name, url); 
+      this.userData.stations.push(newStation);
       this.updateLocalStorage();
+      if(!this.currentStation) {
+        this.changeStation(newStation, 0);
+      }
     },
     deleteStation(stationIndex, snackbarText, snackbarButton) {
       this.deletedStation = {
@@ -264,9 +270,14 @@ export default {
         this.userData.sets.splice(
           i,
           1,
-          new Set(setData.name, setData.description, setData.initialStation)
+          new Set(setData.name, setData.description, setData.initialStation, setData.stations)
         );
       }
+    },
+    loadSet(set) {
+      this.currentSet = set;
+      this.changeStation(set.stations[0], 0);
+      this.stationInSetIndex = 0;
     },
     changeViewedSet(set, index) {
       this.viewedSet = set;
@@ -282,17 +293,20 @@ export default {
         this.triggerSnackbar("station already exists in set!", "close");
       } else {
         this.userData.sets[setIndex].add(this.setModalStation);
+        this.triggerSnackbar(`${this.setModalStation.name} added to ${this.userData.sets[setIndex].name}!`, 'close');
       }
+      this.updateLocalStorage();
     },
     createSet(name, description) {
       this.userData.sets.push(new Set(name, description, this.setModalStation));
+      this.triggerSnackbar(`created ${name}!`, 'close');
       this.updateLocalStorage();
     },
     deleteSet(index, snackbarText, snackbarButton, set) {
-      if(this.view === 'set' && this.viewedSet === set) {
-        this.changeView('home');
+      if (this.view === "set" && this.viewedSet === set) {
+        this.changeView("home");
       }
-      if(this.userData.sets[0] === this.currentSet) {
+      if (set === this.currentSet) {
         this.currentSet = {};
       }
 
@@ -303,8 +317,29 @@ export default {
       this.editSetModal = true;
     },
     updateSet(index, name, description) {
-      this.$set(this.userData.sets[index], 'name', name);
-      this.$set(this.userData.sets[index], 'description', description);
+      this.$set(this.userData.sets[index], "name", name);
+      this.$set(this.userData.sets[index], "description", description);
+    },
+    //station switch methods
+    nextStation() {
+      if (this.currentSet.name) {
+        if(this.stationInSetIndex >= this.currentSet.stations.length-1) {
+          this.stationInSetIndex = 0;
+        } else {
+          this.stationInSetIndex++;
+        }
+        this.changeStation(this.currentSet.stations[this.stationInSetIndex], this.stationInSetIndex);
+      }
+    },
+    previousStation() {
+      if (this.currentSet.name) {
+        if(this.stationInSetIndex <= 0) {
+          this.stationInSetIndex = this.currentSet.stations.length-1;
+        } else {
+          this.stationInSetIndex--;
+        }
+        this.changeStation(this.currentSet.stations[this.stationInSetIndex], this.stationInSetIndex);
+      }
     },
     //storage methods
     updateLocalStorage() {
@@ -317,7 +352,7 @@ export default {
         this.userData = storedData;
       } else {
         console.log("looks like this is your first visit!");
-        this.userData.firstVisit = true;
+        this.updateLocalStorage();
       }
     },
     //listener methods
@@ -343,25 +378,25 @@ export default {
   },
   beforeMount() {
     //debug seed data
-    let stationSeedData = [
-      new Station(
-        "Lofi Hip Hop",
-        "https://www.youtube.com/watch?v=hHW1oY26kxQ"
-      ),
-      new Station(
-        "Lofi Hip Hop 2",
-        "https://www.youtube.com/watch?v=SGwXjk8MsWY"
-      ),
-      new Station("Hype Radio", "https://www.youtube.com/watch?v=GVC5adzPpiE")
-    ];
-    this.userData.stations = stationSeedData;
-    this.userData.sets = [
-      new Set("Skrubtown Radio", "this is a skrub station", stationSeedData[0])
-    ];
-    this.userData.prevVolume = 50;
-    this.currentStation = this.userData.stations[0];
-    this.currentStationIndex = 0;
-    this.updateLocalStorage();
+    // let stationSeedData = [
+    //   new Station(
+    //     "Lofi Hip Hop",
+    //     "https://www.youtube.com/watch?v=hHW1oY26kxQ"
+    //   ),
+    //   new Station(
+    //     "Lofi Hip Hop 2",
+    //     "https://www.youtube.com/watch?v=SGwXjk8MsWY"
+    //   ),
+    //   new Station("Hype Radio", "https://www.youtube.com/watch?v=GVC5adzPpiE")
+    // ];
+    // this.userData.stations = stationSeedData;
+    // this.userData.sets = [
+    //   new Set("Skrubtown Radio", "this is a skrub station", stationSeedData[0])
+    // ];
+    // this.userData.prevVolume = 50;
+    // this.currentStation = this.userData.stations[0];
+    // this.currentStationIndex = 0;
+    // this.updateLocalStorage();
 
     // debug ends here
 
@@ -369,15 +404,23 @@ export default {
 
     //localStorage stores only object data, not class data
     //on load, recreates Set classes based on localStorage 'set' data
-    this.createSetsOnLoad();
-    this.currentSet = this.userData.sets[0];
-    this.userData.sets[0].add(stationSeedData[2]);
+    if(this.userData.sets) {
+      this.createSetsOnLoad();
+    }
+    // this.currentSet = this.userData.sets[0];
+    // this.userData.sets[0].add(stationSeedData[2]);
   },
   mounted() {
-    this.player.loadVideoById(this.userData.stations[0].id).then(() => {
+    // this.player.loadVideoById(this.userData.stations[0].id).then(() => {
+    //   this.player.stopVideo();
+    //   this.volume = this.userData.prevVolume;
+    // });
+
+    if(!this.currentStation && this.userData.stations[0]) {
+      this.changeStation(this.userData.stations[0], 0);
+      this.playing = false;
       this.player.stopVideo();
-      this.volume = this.userData.prevVolume;
-    });
+    }
     this.addListeners();
   }
 };

@@ -19,7 +19,7 @@
             <v-flex xs12>
               <v-text-field
                 v-model="url"
-                label="YouTube URL*"
+                label="YouTube Livestream URL*"
                 :rules="urlRules"
                 required
                 @keydown.enter="validate"
