@@ -50,6 +50,9 @@ export default {
     },
     addToSet() {
       this.$emit("addToSet", this.station);
+    },
+    removeFromSet() {
+      this.$emit('removeFromSet', this.station);
     }
   },
   computed: {
@@ -76,6 +79,14 @@ export default {
             }
           ]
           break;
+
+        case "stationInSet":
+          return [
+            {
+              title: "Remove from set",
+              action: this.removeFromSet
+            }
+          ]
 
         default:
           break;

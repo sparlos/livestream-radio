@@ -1,7 +1,8 @@
 <template>
   <v-app>
     <!-- vue headful stuff -->
-    <vue-headful v-if="currentStation"
+    <vue-headful
+      v-if="currentStation"
       :title="siteTitle"
       :description="`listening to ${currentStation.name} on Livestream Radio`"
     ></vue-headful>
@@ -54,6 +55,7 @@
         @changeStation="changeStation"
         @deleteStation="deleteStation"
         @addToSet="addToSet"
+        @removeFromSet="removeFromSet"
       ></Home>
 
       <Sets
@@ -74,6 +76,7 @@
         @triggerModal="triggerEditSetModal"
         @changeStation="changeStation"
         @loadSet="loadSet"
+        @removeFromSet="removeFromSet"
       ></SetView>
 
       <!-- snackbar -->
@@ -140,6 +143,7 @@ export default {
     currentStation: null,
     currentStationIndex: 0,
     currentSet: {},
+    currentSetIndex: 0,
     stationInSetIndex: 0,
     viewedSet: {},
     viewedSetIndex: null,
@@ -247,10 +251,10 @@ export default {
       this.player.loadVideoById(station.id);
     },
     addStation(name, url) {
-      let newStation = new Station(name, url); 
+      let newStation = new Station(name, url);
       this.userData.stations.push(newStation);
       this.updateLocalStorage();
-      if(!this.currentStation) {
+      if (!this.currentStation) {
         this.changeStation(newStation, 0);
       }
     },
@@ -270,12 +274,24 @@ export default {
         this.userData.sets.splice(
           i,
           1,
-          new Set(setData.name, setData.description, setData.initialStation, setData.stations)
+          new Set(
+            setData.name,
+            setData.description,
+            setData.initialStation,
+            setData.stations
+          )
         );
       }
     },
     loadSet(set) {
       this.currentSet = set;
+      for (let i = 0; i < this.userData.sets.length; i++) {
+        if (this.userData.sets[i] === set) {
+          console.log("match found!");
+          this.currentSetIndex = i;
+          break;
+        }
+      }
       this.changeStation(set.stations[0], 0);
       this.stationInSetIndex = 0;
     },
@@ -293,13 +309,16 @@ export default {
         this.triggerSnackbar("station already exists in set!", "close");
       } else {
         this.userData.sets[setIndex].add(this.setModalStation);
-        this.triggerSnackbar(`${this.setModalStation.name} added to ${this.userData.sets[setIndex].name}!`, 'close');
+        this.triggerSnackbar(
+          `${this.setModalStation.name} added to ${this.userData.sets[setIndex].name}!`,
+          "close"
+        );
       }
       this.updateLocalStorage();
     },
     createSet(name, description) {
       this.userData.sets.push(new Set(name, description, this.setModalStation));
-      this.triggerSnackbar(`created ${name}!`, 'close');
+      this.triggerSnackbar(`created ${name}!`, "close");
       this.updateLocalStorage();
     },
     deleteSet(index, snackbarText, snackbarButton, set) {
@@ -320,25 +339,68 @@ export default {
       this.$set(this.userData.sets[index], "name", name);
       this.$set(this.userData.sets[index], "description", description);
     },
+    removeFromSet(station) {
+      let setIndex = 0;
+      if (this.view === "set") {
+        setIndex = this.viewedSetIndex;
+      } else if (this.view === "home") {
+        removeIndex = this.currentSetIndex;
+      }
+
+      //edge case of last station in set
+      if (this.userData.sets[setIndex].stations.length <= 1) {
+        console.log("last one in set!");
+        this.deleteSet(
+          setIndex,
+          `${station.name} removed and ${this.userData.sets[setIndex].name} deleted`,
+          "close",
+          this.userData.sets[setIndex]
+        );
+        console.log("last one in set!");
+        this.updateLocalStorage();
+        return;
+      }
+
+      let removeIndex = 0;
+
+      for (let i = 0; i < this.userData.sets[setIndex].stations.length; i++) {
+        if (station === this.userData.sets[setIndex].stations[i]) {
+          removeIndex = i;
+          break;
+        }
+      }
+
+      this.userData.sets[setIndex].stations.splice(removeIndex, 1);
+
+      this.triggerSnackbar(`${station.name} removed from ${this.userData.sets[setIndex].name}`, "close");
+
+      this.updateLocalStorage();
+    },
     //station switch methods
     nextStation() {
       if (this.currentSet.name) {
-        if(this.stationInSetIndex >= this.currentSet.stations.length-1) {
+        if (this.stationInSetIndex >= this.currentSet.stations.length - 1) {
           this.stationInSetIndex = 0;
         } else {
           this.stationInSetIndex++;
         }
-        this.changeStation(this.currentSet.stations[this.stationInSetIndex], this.stationInSetIndex);
+        this.changeStation(
+          this.currentSet.stations[this.stationInSetIndex],
+          this.stationInSetIndex
+        );
       }
     },
     previousStation() {
       if (this.currentSet.name) {
-        if(this.stationInSetIndex <= 0) {
-          this.stationInSetIndex = this.currentSet.stations.length-1;
+        if (this.stationInSetIndex <= 0) {
+          this.stationInSetIndex = this.currentSet.stations.length - 1;
         } else {
           this.stationInSetIndex--;
         }
-        this.changeStation(this.currentSet.stations[this.stationInSetIndex], this.stationInSetIndex);
+        this.changeStation(
+          this.currentSet.stations[this.stationInSetIndex],
+          this.stationInSetIndex
+        );
       }
     },
     //storage methods
@@ -404,7 +466,7 @@ export default {
 
     //localStorage stores only object data, not class data
     //on load, recreates Set classes based on localStorage 'set' data
-    if(this.userData.sets) {
+    if (this.userData.sets) {
       this.createSetsOnLoad();
     }
     // this.currentSet = this.userData.sets[0];
@@ -416,7 +478,7 @@ export default {
     //   this.volume = this.userData.prevVolume;
     // });
 
-    if(!this.currentStation && this.userData.stations[0]) {
+    if (!this.currentStation && this.userData.stations[0]) {
       this.changeStation(this.userData.stations[0], 0);
       this.playing = false;
       this.player.stopVideo();

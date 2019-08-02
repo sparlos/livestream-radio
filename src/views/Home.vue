@@ -14,9 +14,7 @@
           <v-responsive v-show="currentStation" :aspect-ratio="16/9">
             <youtube ref="youtube" width="100%" height="100%"></youtube>
           </v-responsive>
-          <span v-show="!currentStation">
-            Nothing is currently playing!
-          </span>
+          <span v-show="!currentStation">Nothing is currently playing!</span>
         </v-flex>
         <v-flex d-flex xs5 px-5 wrap>
           <v-layout wrap align-content-start>
@@ -30,8 +28,19 @@
             <v-flex d-flex xs12 justify-start>
               <v-layout v-if="!currentSet.name">No set loaded!</v-layout>
               <v-layout v-else wrap justify-start align-content-start>
-                <v-flex v-for="(station, i) in currentSet.stations" :key="i" mb-12 mr-5 d-flex shrink="0">
-                  <Station :station="station" @changeStation="$emit('changeStation', station)"></Station>
+                <v-flex
+                  v-for="(station, i) in currentSet.stations"
+                  :key="i"
+                  mb-12
+                  mr-5
+                  d-flex
+                  shrink="0"
+                >
+                  <Station
+                    :station="station"
+                    @changeStation="$emit('changeStation', station)"
+                    @removeFromSet="handleRemoveFromSet"
+                  ></Station>
                 </v-flex>
               </v-layout>
             </v-flex>
@@ -66,6 +75,9 @@ export default {
     },
     handleAddToSet(station) {
       this.$emit("addToSet", station);
+    },
+    handleRemoveFromSet(station) {
+      this.$emit('removeFromSet', station);
     }
   },
   mounted() {

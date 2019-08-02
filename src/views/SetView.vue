@@ -34,7 +34,8 @@
                   type="set"
                   :set="set"
                   :setIndex="setIndex"
-                  @deleteSet="handleDeleteSet"></ContextMenu>
+                  @deleteSet="handleDeleteSet"
+                ></ContextMenu>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -46,13 +47,15 @@
     <v-layout justify-center mt-6>
       <v-flex>
         <v-card max-width="100%">
-          <v-card-title class="font-weight-medium">
-            Stations in {{set.name}}
-          </v-card-title>
+          <v-card-title class="font-weight-medium">Stations in {{set.name}}</v-card-title>
           <v-card-text>
             <v-layout justify-start mt-2>
               <v-flex v-for="(station, i) in set.stations" :key="i" mb-8 shrink mx-3>
-                <Station :station="station" @changeStation="$emit('changeStation', station)"></Station>
+                <Station
+                  :station="station"
+                  @changeStation="$emit('changeStation', station)"
+                  @removeFromSet="handleRemoveFromSet"
+                ></Station>
               </v-flex>
             </v-layout>
           </v-card-text>
@@ -78,14 +81,15 @@ export default {
   },
   computed: {
     displayedImage() {
-      return (
-        "url(" + this.set.stations[0].imageUrl + ")"
-      );
+      return "url(" + this.set.stations[0].imageUrl + ")";
     }
   },
   methods: {
     handleDeleteSet(index, snackbarText, snackbarButton) {
       this.$emit("deleteSet", index, snackbarText, snackbarButton, this.set);
+    },
+    handleRemoveFromSet(station) {
+      this.$emit('removeFromSet', station);
     }
   }
 };
@@ -108,7 +112,6 @@ export default {
 }
 
 .set-more {
-
   &:hover {
     cursor: pointer;
   }
