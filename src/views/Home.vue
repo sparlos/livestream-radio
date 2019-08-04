@@ -12,7 +12,7 @@
           <div class="display-1">Currently Playing</div>
           <div class="title-underline blue mt-3 mb-6"></div>
           <v-responsive v-show="currentStation" :aspect-ratio="16/9">
-            <youtube ref="youtube" width="100%" height="100%"></youtube>
+            <youtube ref="youtube" width="100%" height="100%" @playing="togglePlayPause" @paused="togglePlayPause" ></youtube>
           </v-responsive>
           <span v-show="!currentStation">Nothing is currently playing!</span>
         </v-flex>
@@ -78,7 +78,10 @@ export default {
     },
     handleRemoveFromSet(station) {
       this.$emit('removeFromSet', station);
-    }
+    },
+    togglePlayPause(){
+      this.$emit('youtubeTogglePlayPause', true);
+    },
   },
   mounted() {
     this.$emit("setPlayer", this.$refs.youtube.player);
