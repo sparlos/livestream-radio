@@ -56,6 +56,7 @@
         @deleteStation="deleteStation"
         @addToSet="addToSet"
         @removeFromSet="removeFromSet"
+        @youtubeTogglePlayPause="togglePlayPauseButton"
       ></Home>
 
       <Sets
@@ -237,12 +238,14 @@ export default {
     handleSetPlayer(player) {
       this.player = player;
     },
+    togglePlayPauseButton(val){
+      this.playing = val;
+    },
     toggleVideo() {
       if(this.player && this.currentStation) {
         this.playing ? this.player.pauseVideo() : this.player.playVideo();
         this.playing = !this.playing;
       }
-
     },
     //station methods
     changeStation(station, stationIndex) {
