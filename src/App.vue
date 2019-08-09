@@ -424,12 +424,27 @@ export default {
     },
     //listener methods
     addListeners() {
-      document.addEventListener("keypress", e => {
+      document.addEventListener("keydown", e => {
         switch (e.code) {
           case "Space":
             if (!this.modalOpen) {
               e.preventDefault();
               this.toggleVideo();
+            }
+            break;
+          case "ArrowLeft":
+            if(!this.modalOpen) {
+              this.previousStation();
+            }
+            break;
+          case "ArrowRight":
+            if(!this.modalOpen) {
+              this.previousStation();
+            }
+            break;
+          case "KeyA":
+            if(!this.modalOpen) {
+              this.dialog = true;
             }
             break;
         }
