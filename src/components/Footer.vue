@@ -1,29 +1,34 @@
 <template>
-  <v-footer app elevation="8" color="white" height="90">
-    <div class="footer-image">
-      <v-img v-if="currentStation" :src="currentStation.imageUrl" aspect-ratio=".8"></v-img>
-    </div>
-    <div class="footer-text" v-if="currentStation">{{currentStation.name}}</div>
-    <v-layout align-center justify-center>
-      <v-btn v-for="icon in icons" :key="icon.name" v-bind="icon.attributes" @click="$emit('footerClick', icon.name, $event)">
-        <v-icon dark v-if="icon.name !== 'play_arrow'">{{icon.name}}</v-icon>
-        <v-icon v-else dark large>{{toggleIcon}}</v-icon>
-      </v-btn>
-
-      <div class="mx-8 volume-slider">
-        <v-icon color="black">volume_up</v-icon>
-        <div class="volume-slider__bar">
-          <v-slider
-            @input="volumeChange"
-            :value="volume"
-          ></v-slider>
-        </div>
+  <div>
+    <v-footer app elevation="8" color="white" height="90">
+      <div class="footer-image">
+        <v-img v-if="currentStation" :src="currentStation.imageUrl" aspect-ratio=".8"></v-img>
       </div>
-    </v-layout>
-  </v-footer>
+      <div class="footer-text" v-if="currentStation">{{currentStation.name}}</div>
+      <v-layout align-center justify-center>
+        <v-btn v-for="icon in icons" :key="icon.name" v-bind="icon.attributes" @click.stop="footerClick(icon.name, $event)">
+          <v-icon dark v-if="icon.name !== 'play_arrow'">{{icon.name}}</v-icon>
+          <v-icon v-else dark large>{{toggleIcon}}</v-icon>
+        </v-btn>
+
+        <div class="mx-8 volume-slider">
+          <v-icon color="black">volume_up</v-icon>
+          <div class="volume-slider__bar">
+            <v-slider
+              @input="volumeChange"
+              :value="volume"
+            ></v-slider>
+          </div>
+        </div>
+      </v-layout>
+    </v-footer>
+    <ShortcutModal :modal.sync="shortcutModal"></ShortcutModal>
+  </div>
 </template>
 
 <script>
+import ShortcutModal from './ShortcutModal';
+
 class Icon {
   constructor(name, options) {
     this.name = name;
@@ -42,14 +47,18 @@ class Icon {
 
 export default {
   name: "Footer",
+  components: {
+    ShortcutModal
+  },
   props: {
     playing: Boolean,
     volume: Number,
     currentStation: Object
   },
   data: () => ({
+    shortcutModal: true,
     icons: [
-      new Icon("more_vert"),
+      new Icon("keyboard"),
       new Icon("skip_previous"),
       new Icon("play_arrow", {
         tile: false,
@@ -68,6 +77,13 @@ export default {
     }
   },
   methods: {
+    footerClick(iconName, event) {
+      if(iconName === 'keyboard') {
+        this.shortcutModal = true;
+      } else {
+        this.$emit('footerClick', iconName, event);
+      }
+    },
     volumeChange(payload) {
       this.$emit('update:volume', payload);
     }

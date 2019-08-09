@@ -442,6 +442,11 @@ export default {
               this.previousStation();
             }
             break;
+          case "KeyA":
+            if(!this.modalOpen) {
+              this.dialog = true;
+            }
+            break;
         }
       });
     }
