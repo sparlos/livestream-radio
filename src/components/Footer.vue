@@ -56,7 +56,7 @@ export default {
     currentStation: Object
   },
   data: () => ({
-    shortcutModal: true,
+    shortcutModal: false,
     icons: [
       new Icon("keyboard"),
       new Icon("skip_previous"),
