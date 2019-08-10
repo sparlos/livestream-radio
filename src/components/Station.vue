@@ -2,16 +2,16 @@
   <v-hover v-slot:default="{ hover }">
     <div class="station elevation-5" :style="{backgroundImage: 'url(' + station.imageUrl + ')'}">
       <div class="station__icon" v-if="hover">
-        <v-btn fab color="white" @click="$emit('changeStation', station)">
+        <v-btn fab :color="darkMode ? 'black' : 'white'" @click="$emit('changeStation', station)">
           <v-icon class="station__icon" dark large>play_arrow</v-icon>
         </v-btn>
       </div>
-      <div class="station__name caption black--text">
+      <div :class="['station__name', 'caption', (darkMode ? 'white--text' : 'black--text')]">
         {{station.name}}
       </div>
       <div class="station__menu">
         <ContextMenu
-          color="black"
+          :color="darkMode ? 'white' : 'black'"
           type="stationInSet"
           :station="station"
           @removeFromSet="handleRemoveFromSet"
@@ -27,7 +27,8 @@ import ContextMenu from "../components/ContextMenu";
 export default {
   name: 'Station',
   props: {
-    station: Object
+    station: Object,
+    darkMode: Boolean
   },
   components: {
     ContextMenu
@@ -36,7 +37,7 @@ export default {
     handleRemoveFromSet(station) {
       this.$emit('removeFromSet', station);
     }
-  }
+  },
 }
 
 </script>

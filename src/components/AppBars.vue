@@ -5,11 +5,15 @@
         <span class="font-weight-medium">Livestream</span>
         <span class="blue--text">Radio</span>
       </div>
+       <v-btn icon @click="toggleDarkMode">
+        <v-icon v-if="!darkMode">wb_sunny</v-icon>
+        <v-icon v-else>brightness_3</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <v-navigation-drawer
       app
-      color="grey lighten-5"
+      :color="backgroundColor"
       floating
       clipped
       permanent
@@ -24,11 +28,11 @@
           @click="$emit('changeView', item.name)"
         >
           <div class="navbar-left__icon">
-            <v-icon :color="item.name === view ? 'blue' : 'black'">{{item.icon}}</v-icon>
+            <v-icon :color="item.name === view ? 'blue' : ( darkMode ? 'white' : 'black')">{{item.icon}}</v-icon>
           </div>
           <div
             class="navbar-left__text"
-            :class="item.name === view ? 'blue--text' : 'black--text'"
+            :class="item.name === view ? 'blue--text' : ( darkMode ? 'white--text' : 'black--text')"
           >{{item.name}}</div>
         </div>
       </div>
@@ -40,7 +44,8 @@
 export default {
   name: "AppBars",
   props: {
-    view: String
+    view: String,
+    backgroundColor: String
   },
   data: () => ({
     views: [
@@ -52,8 +57,19 @@ export default {
         name: "sets",
         icon: "library_music"
       }
-    ]
-  })
+    ],
+    darkMode: false
+  }),
+  methods:{
+    toggleDarkMode(){
+      this.darkMode = !this.darkMode;
+      this.$emit('toggleDarkMode', this.darkMode)
+    }
+  },
+  beforeMount() {
+    this.darkMode = this.$vuetify.theme.dark;
+  }
+
 };
 </script>
 

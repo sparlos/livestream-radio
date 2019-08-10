@@ -1,18 +1,18 @@
 <template>
   <div>
-    <v-footer app elevation="8" color="white" height="90">
+    <v-footer app elevation="8"  height="90">
       <div class="footer-image">
         <v-img v-if="currentStation" :src="currentStation.imageUrl" aspect-ratio=".8"></v-img>
       </div>
       <div class="footer-text" v-if="currentStation">{{currentStation.name}}</div>
       <v-layout align-center justify-center>
-        <v-btn v-for="icon in icons" :key="icon.name" v-bind="icon.attributes" @click.stop="footerClick(icon.name, $event)">
+        <v-btn v-for="icon in icons" :key="icon.name" v-bind="icon.attributes"  @click.stop="footerClick(icon.name, $event)">
           <v-icon dark v-if="icon.name !== 'play_arrow'">{{icon.name}}</v-icon>
           <v-icon v-else dark large>{{toggleIcon}}</v-icon>
         </v-btn>
 
         <div class="mx-8 volume-slider">
-          <v-icon color="black">volume_up</v-icon>
+          <v-icon :color="whiteOrBlack">volume_up</v-icon>
           <div class="volume-slider__bar">
             <v-slider
               @input="volumeChange"
@@ -36,7 +36,7 @@ class Icon {
       tile: true,
       large: true,
       icon: true,
-      color: "black"
+      color: 'black'
     };
     for (let attr in options) {
       let value = options[attr];
@@ -53,7 +53,9 @@ export default {
   props: {
     playing: Boolean,
     volume: Number,
-    currentStation: Object
+    currentStation: Object,
+    darkMode: Boolean,
+    backgroundColor: String
   },
   data: () => ({
     shortcutModal: false,
@@ -74,6 +76,9 @@ export default {
   computed: {
     toggleIcon() {
       return this.playing ? 'pause' : 'play_arrow';
+    },
+    whiteOrBlack(){
+      return this.darkMode ? 'white' : 'black';
     }
   },
   methods: {
@@ -86,6 +91,21 @@ export default {
     },
     volumeChange(payload) {
       this.$emit('update:volume', payload);
+    },
+    changeIconColor(){
+      this.icons.map(icon =>{      
+      if(icon.name !== 'play_arrow'){
+          icon.attributes.color = this.whiteOrBlack;
+        };
+      });
+    }
+  },
+  beforeMount(){
+      this.changeIconColor();
+  },
+  watch: {
+    darkMode(){
+      this.changeIconColor();
     }
   }
 };
