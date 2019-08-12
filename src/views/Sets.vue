@@ -18,7 +18,7 @@
                 class="set-thumbnail"
                 :style="{backgroundImage: 'url(' + set.stations[0].imageUrl + ')'}"
               ></div>
-              <v-card-text class="black--text">
+              <v-card-text :class="(darkMode ? 'white--text' : 'black--text')">
                 {{set.name}}
                 <br />
                 <span class="grey--text">
@@ -38,7 +38,8 @@
 export default {
   name: "Sets",
   props: {
-    sets: Array
+    sets: Array,
+    darkMode: Boolean
   },
   data: () => ({
     image: "https://img.youtube.com/vi/hHW1oY26kxQ/sddefault.jpg"

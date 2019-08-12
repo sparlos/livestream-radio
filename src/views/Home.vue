@@ -38,6 +38,7 @@
                 >
                   <Station
                     :station="station"
+                    :darkMode="userData.darkMode"
                     @changeStation="$emit('changeStation', station)"
                     @removeFromSet="handleRemoveFromSet"
                   ></Station>

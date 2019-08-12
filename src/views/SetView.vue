@@ -10,13 +10,19 @@
           <v-flex d-flex xs12>
             <v-layout align-center>
               <div class="set-name display-1">{{set.name}}</div>
-              <v-btn fab class="ml-4" dark @click="$emit('loadSet', set)">
+              <v-btn
+                fab
+                class="ml-4"
+                :light="darkMode ? true : false"
+                :dark="darkMode ? false : true"
+                @click="$emit('loadSet', set)"
+              >
                 <v-icon>play_arrow</v-icon>
               </v-btn>
             </v-layout>
           </v-flex>
-          <v-flex xs12 class="grey--text">{{set.description}}</v-flex>
-          <v-flex xs12 class="grey--text">
+          <v-flex xs12 :class="(darkMode ? 'white--text' : 'grey--text')">{{set.description}}</v-flex>
+          <v-flex xs12 :class="(darkMode ? 'white--text' : 'grey--text')">
             {{set.stations.length}}
             {{1 >= set.stations.length ? 'station' : 'stations'}}
             in this set
@@ -30,7 +36,7 @@
               </v-flex>
               <v-flex>
                 <ContextMenu
-                  color="black"
+                  :color="darkMode ? 'white' : 'black'"
                   type="set"
                   :set="set"
                   :setIndex="setIndex"
@@ -53,6 +59,7 @@
               <v-flex v-for="(station, i) in set.stations" :key="i" mb-8 shrink mx-3>
                 <Station
                   :station="station"
+                  :darkMode="darkMode"
                   @changeStation="$emit('changeStation', station)"
                   @removeFromSet="handleRemoveFromSet"
                 ></Station>
@@ -77,7 +84,8 @@ export default {
   },
   props: {
     set: Object,
-    setIndex: Number
+    setIndex: Number,
+    darkMode: Boolean
   },
   computed: {
     displayedImage() {
@@ -89,7 +97,7 @@ export default {
       this.$emit("deleteSet", index, snackbarText, snackbarButton, this.set);
     },
     handleRemoveFromSet(station) {
-      this.$emit('removeFromSet', station);
+      this.$emit("removeFromSet", station);
     }
   }
 };

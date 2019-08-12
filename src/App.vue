@@ -7,14 +7,14 @@
       :description="`listening to ${currentStation.name} on Livestream Radio`"
     ></vue-headful>
 
-    <AppBars :view="view" @changeView="changeView"></AppBars>
+    <AppBars :view="view" :backgroundColor="backgroundColor" @changeView="changeView" @toggleDarkMode="toggleDarkMode"></AppBars>
 
     <!-- ==== MODALS ===== -->
 
     <!-- add station button & modal -->
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
-        <div class="add-button">
+        <div :class="['add-button', (userData.darkMode ? 'dark-mode': 'light-mode')]" >
           <v-btn fab dark color="blue" x-large v-on="on">
             <v-icon x-large>add</v-icon>
           </v-btn>
@@ -64,6 +64,7 @@
         key="sets"
         :sets="userData.sets"
         :currentSet="currentSet"
+        :darkMode ="userData.darkMode"
         @changeViewedSet="changeViewedSet"
         @loadSet="loadSet"
       ></Sets>
@@ -73,6 +74,7 @@
         key="set"
         :set="viewedSet"
         :setIndex="viewedSetIndex"
+        :darkMode ="userData.darkMode"
         @deleteSet="deleteSet"
         @triggerModal="triggerEditSetModal"
         @changeStation="changeStation"
@@ -92,11 +94,13 @@
       :playing="playing"
       :volume.sync="volume"
       :currentStation="currentStation"
+      :darkMode="userData.darkMode"
+      :backgroundColor="backgroundColor"
     ></Footer>
 
     <v-navigation-drawer
       app
-      color="grey lighten-5"
+      :color="backgroundColor"
       floating
       clipped
       height="200"
@@ -166,7 +170,8 @@ export default {
     userData: {
       stations: [],
       sets: [],
-      prevVolume: 10
+      prevVolume: 10,
+      darkMode: false
     }
   }),
   computed: {
@@ -178,7 +183,11 @@ export default {
     modalOpen() {
       if (this.dialog || this.setModal || this.editSetModal) return true;
       return false;
-    }
+    },
+    backgroundColor(){
+          var isDark = this.$vuetify.theme.dark ? 'dark' : 'light'
+          return this.$vuetify.theme.themes[isDark].backgroundColor;
+    },
   },
   methods: {
     //snackbar methods
@@ -414,7 +423,6 @@ export default {
     },
     loadLocalStorage() {
       let storedData = JSON.parse(localStorage.getItem("userData"));
-
       if (storedData) {
         this.userData = storedData;
       } else {
@@ -449,6 +457,12 @@ export default {
             break;
         }
       });
+    },
+    toggleDarkMode(value){
+      this.userData.darkMode = value;
+      this.$vuetify.theme.dark= value;
+      this.updateLocalStorage();
+
     }
   },
   watch: {
@@ -489,6 +503,9 @@ export default {
     if (this.userData.sets) {
       this.createSetsOnLoad();
     }
+    if(this.userData.darkMode){
+      this.$vuetify.theme.dark= this.userData.darkMode;
+    }
     // this.currentSet = this.userData.sets[0];
     // this.userData.sets[0].add(stationSeedData[2]);
   },
@@ -517,5 +534,11 @@ export default {
   width: 100px;
   height: 100px;
   z-index: 100;
+}
+.dark-mode{
+  background-color: #303030 !important;
+}
+.light-mode{
+    background-color: #FAFAFA !important;
 }
 </style>

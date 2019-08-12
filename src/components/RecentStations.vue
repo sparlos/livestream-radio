@@ -65,7 +65,7 @@ export default {
 <style scoped lang='scss'>
 .stations {
   max-height: 150px;
-  overflow-y: scroll;
+  overflow-y: hidden;;
 }
 
 .text--underline {
