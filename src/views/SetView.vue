@@ -9,14 +9,20 @@
         <v-layout wrap align-start>
           <v-flex d-flex xs12>
             <v-layout align-center>
-              <div class="set-name display-1 ">{{set.name}}</div>
-              <v-btn fab class="ml-4" dark @click="$emit('loadSet', set)">
+              <div class="set-name display-1">{{set.name}}</div>
+              <v-btn
+                fab
+                class="ml-4"
+                :light="darkMode ? true : false"
+                :dark="darkMode ? false : true"
+                @click="$emit('loadSet', set)"
+              >
                 <v-icon>play_arrow</v-icon>
               </v-btn>
             </v-layout>
           </v-flex>
-          <v-flex xs12 class="white--text">{{set.description}}</v-flex>
-          <v-flex xs12 class="grey--text">
+          <v-flex xs12 :class="(darkMode ? 'white--text' : 'grey--text')">{{set.description}}</v-flex>
+          <v-flex xs12 :class="(darkMode ? 'white--text' : 'grey--text')">
             {{set.stations.length}}
             {{1 >= set.stations.length ? 'station' : 'stations'}}
             in this set
@@ -91,7 +97,7 @@ export default {
       this.$emit("deleteSet", index, snackbarText, snackbarButton, this.set);
     },
     handleRemoveFromSet(station) {
-      this.$emit('removeFromSet', station);
+      this.$emit("removeFromSet", station);
     }
   }
 };

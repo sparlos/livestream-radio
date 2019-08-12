@@ -22,7 +22,7 @@
         </div>
       </v-layout>
     </v-footer>
-    <ShortcutModal :modal.sync="shortcutModal"></ShortcutModal>
+    <ShortcutModal :modal.sync="shortcutModal" :darkMode="darkMode"></ShortcutModal>
   </div>
 </template>
 

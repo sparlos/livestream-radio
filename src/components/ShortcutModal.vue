@@ -12,7 +12,7 @@
                   <span v-else>{{shortcut.key}}</span>
                 </v-btn>
               </v-flex>
-              <v-flex xs7 class="shortcut__text">
+              <v-flex xs7 class="shortcut__text" :class="darkMode ? 'white--text' : 'black--text'">
                 {{shortcut.text}}
               </v-flex>
             </v-layout>
@@ -27,7 +27,8 @@
 export default {
   name: 'ShortcutModal',
   props: {
-    modal: Boolean
+    modal: Boolean,
+    darkMode: Boolean
   },
   data: () => ({
     shortcuts: [
@@ -72,7 +73,6 @@ export default {
 .shortcut {
   margin-top: 10px;
   &__text {
-    color: black;
     margin-left: 10px;
   }
 }
