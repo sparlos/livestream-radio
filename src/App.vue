@@ -448,7 +448,7 @@ export default {
             break;
           case "ArrowRight":
             if(!this.modalOpen) {
-              this.previousStation();
+              this.nextStation();
             }
             break;
           case "KeyA":
