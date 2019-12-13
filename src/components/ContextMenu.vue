@@ -69,7 +69,6 @@ export default {
               action: this.deleteStation
             }
           ];
-          break;
         
         case "set":
           return [
@@ -78,7 +77,6 @@ export default {
               action: this.deleteSet
             }
           ]
-          break;
 
         case "stationInSet":
           return [
@@ -89,7 +87,7 @@ export default {
           ]
 
         default:
-          break;
+          return [];
       }
     }
   }
