@@ -203,6 +203,7 @@ export default {
           break;
         case "close":
           this.snackbar = false;
+          break;
         default:
           break;
       }
@@ -466,7 +467,7 @@ export default {
     }
   },
   watch: {
-    volume(newValue, oldValue) {
+    volume(newValue) {
       this.player.setVolume(newValue);
       this.userData.prevVolume = newValue;
       this.updateLocalStorage();

@@ -96,7 +96,7 @@ export default {
       this.icons.map(icon =>{      
       if(icon.name !== 'play_arrow'){
           icon.attributes.color = this.whiteOrBlack;
-        };
+        }
       });
     }
   },
